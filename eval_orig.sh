@@ -1,26 +1,13 @@
 #!/bin/bash
 
 # Black Box Challenge Evaluation Script
-# This script tests your reimbursement calculation implementation against historical cases
+# This script tests your reimbursement calculation implementation against 1,000 historical cases
 
 set -e
 
 echo "🧾 Black Box Challenge - Reimbursement System Evaluation"
 echo "======================================================="
 echo
-
-# Get dataset file from command line argument, default to public_cases.json
-DATASET_FILE="${1:-public_cases.json}"
-
-# Check if dataset file exists
-if [ ! -f "$DATASET_FILE" ]; then
-    echo "❌ Error: Dataset file '$DATASET_FILE' not found!"
-    echo "Usage: $0 [dataset_file]"
-    echo "  dataset_file: JSON file with test cases (default: public_cases.json)"
-    exit 1
-fi
-
-echo "📁 Using dataset: $DATASET_FILE"
 
 # Check if jq is available
 if ! command -v jq &> /dev/null; then
@@ -54,44 +41,24 @@ fi
 # Make run.sh executable
 chmod +x run.sh
 
-# Count test cases in the dataset
-num_cases=$(jq length "$DATASET_FILE")
-echo "📊 Running evaluation against $num_cases test cases..."
+# Check if public cases exist
+if [ ! -f "public_cases.json" ]; then
+    echo "❌ Error: public_cases.json not found!"
+    echo "Please ensure the public cases file is in the current directory."
+    exit 1
+fi
+
+echo "📊 Running evaluation against 1,000 test cases..."
 echo
 
-# Check if it's the format with 'input' and 'expected_output' (public_cases format) 
-# or direct format (private_cases format)
-has_input_field=$(jq -r '.[0] | has("input")' "$DATASET_FILE")
-
-if [ "$has_input_field" = "true" ]; then
-    # Public cases format with 'input' and 'expected_output'
-    test_data=$(jq -r '.[] | "\(.input.trip_duration_days):\(.input.miles_traveled):\(.input.total_receipts_amount):\(.expected_output)"' "$DATASET_FILE")
-else
-    # Private cases format - need to calculate expected output using reimbursement.py
-    echo "⚙️  Calculating expected outputs using reimbursement.py..."
-    test_data=""
-    while IFS= read -r line; do
-        trip_duration=$(echo "$line" | jq -r '.trip_duration_days')
-        miles_traveled=$(echo "$line" | jq -r '.miles_traveled')
-        receipts_amount=$(echo "$line" | jq -r '.total_receipts_amount')
-        
-        # Calculate expected output using Python
-        expected=$(python3 -c "
-from reimbursement import calculate_reimbursement
-result = calculate_reimbursement($trip_duration, $miles_traveled, $receipts_amount)
-print(result)
-")
-        
-        test_data="${test_data}${trip_duration}:${miles_traveled}:${receipts_amount}:${expected}"$'\n'
-    done < <(jq -c '.[]' "$DATASET_FILE")
-fi
+# Extract all test data upfront in a single jq call for better performance
+echo "Extracting test data..."
+test_data=$(jq -r '.[] | "\(.input.trip_duration_days):\(.input.miles_traveled):\(.input.total_receipts_amount):\(.expected_output)"' public_cases.json)
 
 # Convert to arrays for faster access (compatible with bash 3.2+)
 test_cases=()
 while IFS= read -r line; do
-    if [ -n "$line" ]; then
-        test_cases+=("$line")
-    fi
+    test_cases+=("$line")
 done <<< "$test_data"
 num_cases=${#test_cases[@]}
 
@@ -107,7 +74,7 @@ errors_array=()
 
 # Process each test case
 for ((i=0; i<num_cases; i++)); do
-    if [ $((i % 25)) -eq 0 ]; then
+    if [ $((i % 100)) -eq 0 ]; then
         echo "Progress: $i/$num_cases cases processed..." >&2
     fi
     
@@ -179,7 +146,6 @@ else
     echo "✅ Evaluation Complete!"
     echo ""
     echo "📈 Results Summary:"
-    echo "  Dataset: $DATASET_FILE"
     echo "  Total test cases: $num_cases"
     echo "  Successful runs: $successful_runs"
     echo "  Exact matches (±\$0.01): $exact_matches (${exact_pct}%)"
@@ -196,11 +162,11 @@ else
     # Provide feedback based on exact matches
     if [ $exact_matches -eq $num_cases ]; then
         echo "🏆 PERFECT SCORE! You have reverse-engineered the system completely!"
-    elif [ $exact_matches -gt $((num_cases * 95 / 100)) ]; then
+    elif [ $exact_matches -gt 950 ]; then
         echo "🥇 Excellent! You are very close to the perfect solution."
-    elif [ $exact_matches -gt $((num_cases * 80 / 100)) ]; then
+    elif [ $exact_matches -gt 800 ]; then
         echo "🥈 Great work! You have captured most of the system behavior."
-    elif [ $exact_matches -gt $((num_cases * 50 / 100)) ]; then
+    elif [ $exact_matches -gt 500 ]; then
         echo "🥉 Good progress! You understand some key patterns."
     else
         echo "📚 Keep analyzing the patterns in the interviews and test cases."

@@ -1,0 +1,82 @@
+[
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 547,
+      "total_receipts_amount": 119.09
+    },
+    "expected_output": 509.52
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 730,
+      "total_receipts_amount": 285.24
+    },
+    "expected_output": 624.78
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 933,
+      "total_receipts_amount": 1589.58
+    },
+    "expected_output": 1489.99
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 941,
+      "total_receipts_amount": 1565.77
+    },
+    "expected_output": 1432.79
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 68,
+      "total_receipts_amount": 756.61
+    },
+    "expected_output": 648.53
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 897,
+      "total_receipts_amount": 2382.39
+    },
+    "expected_output": 1437.95
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 296,
+      "total_receipts_amount": 1878.7
+    },
+    "expected_output": 1354
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 798,
+      "total_receipts_amount": 2334.41
+    },
+    "expected_output": 1485.4
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 958,
+      "total_receipts_amount": 1855.58
+    },
+    "expected_output": 1549.54
+  },
+  {
+    "input": {
+      "trip_duration_days": 2,
+      "miles_traveled": 1139,
+      "total_receipts_amount": 306.43
+    },
+    "expected_output": 726.14
+  }
+]
